@@ -1,0 +1,87 @@
+/* Home.css */
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px;
+  background: #f5f4f0;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a18;
+  margin: 0 0 8px;
+}
+
+.home-subtitle {
+  color: #6b6b65;
+  font-size: 1rem;
+  margin: 0 0 40px;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.user-card {
+  background: #fff;
+  border: 0.5px solid #d3d1c7;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow 0.2s;
+}
+.user-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.user-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e6f1fb;
+  color: #185fa5;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+}
+.user-info h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a18;
+  margin: 0 0 4px;
+}
+.user-info span {
+  font-size: 0.85rem;
+  color: #6b6b65;
+}
+
+.btn-view-profile {
+  background: #1a1a18;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-view-profile:hover  { background: #333; }
+.btn-view-profile:active { transform: scale(0.97); }
