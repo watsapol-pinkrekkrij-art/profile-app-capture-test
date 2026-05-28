@@ -83,15 +83,39 @@ export default function Profile() {
         backgroundColor: "#ffffff",
         logging: false,
       });
+
+      const filename = `profile_${user.name.replace(/\s+/g, "_")}.jpg`;
+
+      // ลอง Web Share API ก่อน (บันทึกลง Photos ได้เลยบน iOS/Android)
+      if (navigator.canShare) {
+        const blob = await new Promise((res) =>
+          canvas.toBlob(res, "image/jpeg", 0.92)
+        );
+        const file = new File([blob], filename, { type: "image/jpeg" });
+
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `โปรไฟล์ ${user.name}`,
+          });
+          return; // สำเร็จ — ออกได้เลย
+        }
+      }
+
+      // Fallback: download ปกติ (กรณี browser ไม่รองรับ share)
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `profile_summary_${user.name.replace(/\s+/g, "_")}.jpg`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
     } catch (err) {
-      console.error("Capture failed:", err);
+      // user กด Cancel share ถือว่า OK ไม่ต้อง alert
+      if (err.name !== "AbortError") {
+        console.error("Capture failed:", err);
+      }
     } finally {
       setCapturing(false);
     }
@@ -197,7 +221,7 @@ export default function Profile() {
       )}
       {downloadDone && !capturing && (
         <div className="capture-badge success">
-          {mobile ? "📱 บันทึกหน้าสรุปลงเครื่องแล้ว" : "💾 ดาวน์โหลด .jpg แล้ว"}
+          {mobile ? "📱 เปิด Share Sheet แล้ว กด Save to Photos" : "💾 ดาวน์โหลด .jpg แล้ว"}
           <button
             className="btn-redownload"
             onClick={() => {
@@ -269,7 +293,7 @@ export default function Profile() {
 
           <p className="device-mode-hint">
             {mobile
-              ? "📱 Mobile: บันทึกภาพหน้าสรุปอัตโนมัติ"
+              ? "📱 Mobile: แชร์รูปหน้าสรุปอัตโนมัติ"
               : "🖥️ PC: ดาวน์โหลดรูปโปรไฟล์ .jpg อัตโนมัติ"}
           </p>
         </div>
