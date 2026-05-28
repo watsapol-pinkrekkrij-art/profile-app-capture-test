@@ -50,25 +50,11 @@ export default function Profile() {
   }, [user]);
 
   const handleAutoDownload = async () => {
-    if (isMobile()) {
-      await captureAndDownloadMobile();
-    } else {
-      downloadAvatarPC();
-    }
+    await captureAndDownload();
     setDownloadDone(true);
   };
 
-  const downloadAvatarPC = () => {
-    const url = avatarUrl || generatePlaceholderDataUrl(user);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `profile_${user.name.replace(/\s+/g, "_")}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const captureAndDownloadMobile = async () => {
+  const captureAndDownload = async () => {
     if (!profileCardRef.current) return;
     setCapturing(true);
     try {
@@ -86,23 +72,19 @@ export default function Profile() {
 
       const filename = `profile_${user.name.replace(/\s+/g, "_")}.jpg`;
 
-      // ลอง Web Share API ก่อน (บันทึกลง Photos ได้เลยบน iOS/Android)
-      if (navigator.canShare) {
+      // Mobile: ใช้ Web Share API
+      if (isMobile() && navigator.canShare) {
         const blob = await new Promise((res) =>
           canvas.toBlob(res, "image/jpeg", 0.92)
         );
         const file = new File([blob], filename, { type: "image/jpeg" });
-
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `โปรไฟล์ ${user.name}`,
-          });
-          return; // สำเร็จ — ออกได้เลย
+          await navigator.share({ files: [file], title: `โปรไฟล์ ${user.name}` });
+          return;
         }
       }
 
-      // Fallback: download ปกติ (กรณี browser ไม่รองรับ share)
+      // PC หรือ fallback: download ทั้ง profile card
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       const link = document.createElement("a");
       link.href = dataUrl;
@@ -112,10 +94,7 @@ export default function Profile() {
       document.body.removeChild(link);
 
     } catch (err) {
-      // user กด Cancel share ถือว่า OK ไม่ต้อง alert
-      if (err.name !== "AbortError") {
-        console.error("Capture failed:", err);
-      }
+      if (err.name !== "AbortError") console.error("Capture failed:", err);
     } finally {
       setCapturing(false);
     }
@@ -162,21 +141,6 @@ export default function Profile() {
       s.onerror = reject;
       document.head.appendChild(s);
     });
-
-  const generatePlaceholderDataUrl = (u) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 300;
-    canvas.height = 300;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#e6f1fb";
-    ctx.fillRect(0, 0, 300, 300);
-    ctx.fillStyle = "#185fa5";
-    ctx.font = "bold 120px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(u.name.charAt(0), 150, 155);
-    return canvas.toDataURL("image/jpeg", 0.9);
-  };
 
   if (loading)
     return (
@@ -294,7 +258,7 @@ export default function Profile() {
           <p className="device-mode-hint">
             {mobile
               ? "📱 Mobile: แชร์รูปหน้าสรุปอัตโนมัติ"
-              : "🖥️ PC: ดาวน์โหลดรูปโปรไฟล์ .jpg อัตโนมัติ"}
+              : "🖥️ PC: ดาวน์โหลดรูป profile card .jpg อัตโนมัติ"}
           </p>
         </div>
       </div>
